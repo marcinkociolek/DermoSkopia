@@ -128,7 +128,40 @@ bool GetTiffProperties(string FileName, float &xRes, float &yRes)
     }
 }
 //------------------------------------------------------------------------------------------------------------------------------
+cv::Mat MaskBackround(cv::Mat ImIn)
+{
+    Mat Mask;
+    Mask.release();
+    if(ImIn.channels() != 3)
+    {
+        return Mask;
+    }
 
+    int maxX = ImIn.cols;
+    int maxY = ImIn.rows;
+    int maxXY = maxX * maxY;
+    Mask = Mat::zeros(maxY, maxX, CV_16U);
+
+    uint16 *wMask = (uint16 *)Mask.data;
+
+    unsigned char *wImIn = (unsigned char *)ImIn.data;
+
+    for(int i = 0; i < maxXY; i++)
+    {
+        unsigned char B = *wImIn;
+        wImIn++;
+        unsigned char G = *wImIn;
+        wImIn++;
+        unsigned char R = *wImIn;
+        wImIn++;
+
+        if(R > 95 && G > 40 && B > 20 && R - G > 15 && R > G && R > B)
+            *wMask = 1;
+        wMask++;
+    }
+
+    return Mask;
+}
 
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
@@ -260,7 +293,7 @@ void MainWindow::ShowImages()
         ShowsScaledImage(ShowImage16PseudoColor(ImGray,ui->doubleSpinBoxFixMinDisp->value(),
                                          ui->doubleSpinBoxFixMaxDisp->value()), "PC Image");
 
-    if(ui->checkBoxShowGray->checkState())
+    if(ui->checkBoxShowGradient->checkState() && ui->checkBoxProcessGradient->checkState())
         ShowsScaledImage(ShowImage16PseudoColor(ImGradient,ui->doubleSpinBoxFixMinDispGrad->value(),
                                          ui->doubleSpinBoxFixMaxDispGrad->value()), "Gradient Image");
 
@@ -314,23 +347,29 @@ void MainWindow::ProcessImages()
 
     ImGrayTemp.convertTo(ImGray,CV_16U);
 
-    switch(ui->comboBoxGradient->currentIndex())
+    if(ui->checkBoxProcessGradient->checkState())
     {
-    case 1:
-        ImGradient = GradientUp(ImGray);
-        ImGradient.convertTo(ImGradient,CV_16U,10);
-    break;
-    case 2:
-        ImGradient = GradientDown(ImGray);
-        ImGradient.convertTo(ImGradient,CV_16U,10);
-    break;
-    default:
-        ImGradient = GradientMorph(ImGray,ui->spinBoxGradientSchape->value())*10;
-    break;
+        switch(ui->comboBoxGradient->currentIndex())
+        {
+        case 1:
+            ImGradient = GradientUP(ImGray);
+            ImGradient.convertTo(ImGradient,CV_16U,10);
+        break;
+        case 2:
+            ImGradient = GradientDown(ImGray);
+            ImGradient.convertTo(ImGradient,CV_16U,10);
+        break;
+        default:
+            ImGradient = GradientMorph(ImGray,ui->spinBoxGradientSchape->value())*10;
+        break;
+        }
+        Mask = Threshold16(ImGradient, ui->spinBoxGradThreshold->value());
+
     }
-
-
-    Mask = Threshold16(ImGradient, ui->spinBoxGradThreshold->value());
+    if(ui->checkBoxMaskBackGround->checkState() && ImIn.channels() == 3)
+    {
+        Mask = MaskBackround(ImIn);
+    }
 
     ShowImages();
 }

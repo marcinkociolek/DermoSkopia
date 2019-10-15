@@ -459,7 +459,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>.+.tif</string>
+      <string>.+.JPG</string>
      </property>
     </widget>
     <widget class="QListWidget" name="listWidgetImageFiles">
@@ -489,7 +489,7 @@
       <x>670</x>
       <y>80</y>
       <width>151</width>
-      <height>411</height>
+      <height>91</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -508,22 +508,6 @@
       </rect>
      </property>
     </widget>
-    <widget class="QCheckBox" name="checkBoxShowGradient">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>160</y>
-       <width>121</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Show Gradient</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
     <widget class="QCheckBox" name="checkBoxShowGray">
      <property name="geometry">
       <rect>
@@ -540,11 +524,59 @@
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="QCheckBox" name="checkBoxShowPC">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>72</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show PC</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QFrame" name="frame_4">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>170</y>
+      <width>151</width>
+      <height>231</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QCheckBox" name="checkBoxShowGradient">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>121</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show Gradient</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
     <widget class="QDoubleSpinBox" name="doubleSpinBoxFixMinDispGrad">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>190</y>
+       <y>130</y>
        <width>62</width>
        <height>22</height>
       </rect>
@@ -566,7 +598,7 @@
      <property name="geometry">
       <rect>
        <x>80</x>
-       <y>190</y>
+       <y>130</y>
        <width>62</width>
        <height>22</height>
       </rect>
@@ -591,7 +623,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>130</y>
+       <y>70</y>
        <width>91</width>
        <height>22</height>
       </rect>
@@ -610,7 +642,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>250</y>
+       <y>190</y>
        <width>101</width>
        <height>30</height>
       </rect>
@@ -623,7 +655,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>220</y>
+       <y>160</y>
        <width>111</width>
        <height>32</height>
       </rect>
@@ -651,26 +683,52 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>100</y>
+       <y>40</y>
        <width>121</width>
        <height>22</height>
       </rect>
      </property>
     </widget>
-    <widget class="QCheckBox" name="checkBoxShowPC">
+    <widget class="QCheckBox" name="checkBoxProcessGradient">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>60</y>
+       <y>10</y>
+       <width>111</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Process Gradient</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QFrame" name="frame_5">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>400</y>
+      <width>151</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QCheckBox" name="checkBoxMaskBackGround">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
        <width>72</width>
        <height>20</height>
       </rect>
      </property>
      <property name="text">
-      <string>Show PC</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
+      <string>CheckBox</string>
      </property>
     </widget>
    </widget>

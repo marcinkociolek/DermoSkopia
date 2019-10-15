@@ -31,8 +31,8 @@ SOURCES += \
         ../../ProjectsLib/LibMarcin/DispLib.cpp \
         ../../ProjectsLib/LibMarcin/StringFcLib.cpp \
         ../../ProjectsLib/LibMarcin/histograms.cpp \
-        ../../ProjectsLib/LibMarcin/gradient.cpp \
-        ../../ProjectsLib/LibMarcin/RegionU16Lib.cpp
+        ../../ProjectsLib/LibMarcin/RegionU16Lib.cpp \
+    ../../ProjectsLib/LibMarcin/gradient.cpp
 
 HEADERS += \
         mainwindow.h\
@@ -40,8 +40,8 @@ HEADERS += \
         ../../ProjectsLib/LibMarcin/DispLib.h \
         ../../ProjectsLib/LibMarcin/StringFcLib.h \
         ../../ProjectsLib/LibMarcin/histograms.h \
-        ../../ProjectsLib/LibMarcin/gradient.h \
-        ../../ProjectsLib/LibMarcin/RegionU16Lib.h
+        ../../ProjectsLib/LibMarcin/RegionU16Lib.h \
+    ../../ProjectsLib/LibMarcin/gradient.h
 
 FORMS += \
         mainwindow.ui
