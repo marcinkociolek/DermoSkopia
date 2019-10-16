@@ -28,6 +28,9 @@ public:
     cv::Mat Mask;
     cv::Mat ImOut;
 
+    std::vector<cv::Mat> TileImVector;
+    std::vector<cv::Mat> TileMaskVector;
+
 
 
     double minIm;
@@ -40,6 +43,7 @@ public:
     void ShowsScaledImage(cv::Mat Im, std::string ImWindowName);
     void ShowImages();
     void ProcessImages();
+    void ProcessTile();
 
 
 private slots:
@@ -92,6 +96,8 @@ private slots:
     void on_comboBoxOutputMode_currentIndexChanged(int index);
 
     void on_checkBoxShowPC_toggled(bool checked);
+
+    void on_spinBoxTileToProcess_valueChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;

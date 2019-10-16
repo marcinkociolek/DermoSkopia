@@ -162,6 +162,27 @@ cv::Mat MaskBackround(cv::Mat ImIn)
 
     return Mask;
 }
+//------------------------------------------------------------------------------------------------------------------------------
+void ShowsScaledImage2(Mat Im, string ImWindowName, double displayScale, bool imRotate)
+{
+    if(Im.empty())
+    {
+        return;
+    }
+
+    Mat ImToShow;
+
+
+    ImToShow = Im.clone();
+
+    if (displayScale != 1.0)
+        cv::resize(ImToShow,ImToShow,Size(), displayScale, displayScale, INTER_AREA);
+    if(imRotate)
+        rotate(ImToShow,ImToShow, ROTATE_90_CLOCKWISE);
+    imshow(ImWindowName, ImToShow);
+
+}
+//------------------------------------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
@@ -366,13 +387,84 @@ void MainWindow::ProcessImages()
         Mask = Threshold16(ImGradient, ui->spinBoxGradThreshold->value());
 
     }
+
     if(ui->checkBoxMaskBackGround->checkState() && ImIn.channels() == 3)
     {
         Mask = MaskBackround(ImIn);
+
+        if(ui->checkBoxProcessTile->checkState())
+        {
+            int tileSize = ui->spinBoxTileSize->value();
+            int tileStep =tileSize/2;
+            TileImVector.clear();
+            TileMaskVector.clear();
+
+            int maxX = ImIn.cols;
+            int maxY = ImIn.rows;
+
+            int limX = maxX - tileSize;
+            int limY = maxY - tileSize;
+
+            for(int y = 0; y < limY; y += tileStep)
+            {
+                for(int x = 0; x < limX; x += tileStep)
+                {
+                    Mat TileMask;
+                    Mask(Rect(x, y, tileSize, tileSize)).copyTo(TileMask);
+
+                    uint16 *wTileMask = (uint16 *)TileMask.data;
+                    int tileMaxXY = tileSize * tileSize;
+                    int tileMaskCount = 0;
+                    for(int i = 0; i < tileMaxXY; i++)
+                    {
+                        if(*wTileMask)
+                            tileMaskCount++;
+                        wTileMask++;
+                    }
+                    int tileMaskThreshold = tileMaxXY * 90/100;
+                    if(tileMaskCount > tileMaskThreshold)
+                    {
+                        TileMaskVector.push_back(TileMask);
+                        Mat TileIm;
+                        ImIn(Rect(x, y, tileSize, tileSize)).copyTo(TileIm);
+                        TileImVector.push_back(TileIm);
+                    }
+                }
+            }
+            ui->lineEditTileCount->setText(QString::fromStdString(to_string(TileImVector.size())));
+            ui->spinBoxTileToProcess->setMaximum(TileImVector.size() - 1);
+
+        }
     }
+
+
 
     ShowImages();
 }
+//------------------------------------------------------------------------------------------------------------------------------
+void MainWindow::ProcessTile()
+{
+    if(TileImVector.empty())
+        return;
+    if(TileMaskVector.empty())
+        return;
+    if(TileImVector.size() != TileMaskVector.size())
+        return;
+    int tileNr = ui->spinBoxTileToProcess->value();
+    if(tileNr >= TileMaskVector.size())
+        return;
+
+    Mat TileIm = TileImVector[tileNr];
+    Mat TileMask = TileMaskVector[tileNr];
+    if(ui->checkBoxShowTile->checkState())
+    {
+        ShowsScaledImage2(TileIm,"Tile Im",2.0,false);
+        ShowsScaledImage2(ShowRegion(TileMask),"Tile mask",2.0,false);
+    }
+
+}
+//------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
 //          Slots
 //------------------------------------------------------------------------------------------------------------------------------
@@ -520,4 +612,9 @@ void MainWindow::on_comboBoxOutputMode_currentIndexChanged(int index)
 void MainWindow::on_checkBoxShowPC_toggled(bool checked)
 {
      ShowImages();
+}
+
+void MainWindow::on_spinBoxTileToProcess_valueChanged(int arg1)
+{
+    ProcessTile();
 }
