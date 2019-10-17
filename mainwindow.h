@@ -30,6 +30,7 @@ public:
 
     std::vector<cv::Mat> TileImVector;
     std::vector<cv::Mat> TileMaskVector;
+    std::vector<cv::Point> TilePositionVector;
 
 
 
@@ -98,6 +99,15 @@ private slots:
     void on_checkBoxShowPC_toggled(bool checked);
 
     void on_spinBoxTileToProcess_valueChanged(int arg1);
+
+    void on_spinBoxHistScaleHeight_valueChanged(int arg1);
+
+    void on_spinBoxHistScaleCoef_valueChanged(int arg1);
+
+    void on_spinBoxHistBarWidth_valueChanged(int arg1);
+
+
+    void on_checkBoxShowHist_toggled(bool checked);
 
 private:
     Ui::MainWindow *ui;

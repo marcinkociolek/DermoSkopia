@@ -82,7 +82,7 @@
       <x>510</x>
       <y>81</y>
       <width>161</width>
-      <height>451</height>
+      <height>461</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -139,7 +139,7 @@
       <number>8</number>
      </property>
      <property name="value">
-      <number>2</number>
+      <number>3</number>
      </property>
     </widget>
     <widget class="QLabel" name="labelScaleBase">
@@ -327,6 +327,9 @@
      <property name="text">
       <string>Show Histogram</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QLabel" name="labelMaxHistScale_2">
      <property name="geometry">
@@ -360,7 +363,7 @@
       <number>1</number>
      </property>
      <property name="value">
-      <number>5</number>
+      <number>10</number>
      </property>
     </widget>
     <widget class="QSpinBox" name="spinBoxHistScaleCoef">
@@ -385,7 +388,7 @@
       <number>5</number>
      </property>
      <property name="value">
-      <number>3</number>
+      <number>2</number>
      </property>
     </widget>
     <widget class="QLabel" name="labelDirHistBarWidth_2">
@@ -417,7 +420,7 @@
       <number>1</number>
      </property>
      <property name="value">
-      <number>4</number>
+      <number>2</number>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBoxImRotate">
@@ -444,22 +447,6 @@
      </property>
      <property name="text">
       <string>Show mask</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBoxShowTile">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>160</y>
-       <width>72</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Show Tile</string>
      </property>
      <property name="checked">
       <bool>true</bool>
@@ -725,10 +712,10 @@
    <widget class="QFrame" name="frame_5">
     <property name="geometry">
      <rect>
-      <x>670</x>
-      <y>370</y>
+      <x>820</x>
+      <y>80</y>
       <width>151</width>
-      <height>161</height>
+      <height>231</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -791,7 +778,7 @@
       <number>32</number>
      </property>
      <property name="value">
-      <number>64</number>
+      <number>128</number>
      </property>
     </widget>
     <widget class="QLabel" name="labelTileSize">
@@ -851,6 +838,67 @@
      </property>
      <property name="text">
       <string>TileCount</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBoxShowTile">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>140</y>
+       <width>72</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show Tile</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelTileScale">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>160</y>
+       <width>47</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Tile Scale</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="doubleSpinBoxTileScale">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>160</y>
+       <width>41</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>0</number>
+     </property>
+     <property name="minimum">
+      <double>4.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>8.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBoxShowTileOnImage">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>190</y>
+       <width>121</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show Tile On Image</string>
      </property>
     </widget>
    </widget>

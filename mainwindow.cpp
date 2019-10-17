@@ -398,6 +398,7 @@ void MainWindow::ProcessImages()
             int tileStep =tileSize/2;
             TileImVector.clear();
             TileMaskVector.clear();
+            TilePositionVector.clear();
 
             int maxX = ImIn.cols;
             int maxY = ImIn.rows;
@@ -428,6 +429,8 @@ void MainWindow::ProcessImages()
                         Mat TileIm;
                         ImIn(Rect(x, y, tileSize, tileSize)).copyTo(TileIm);
                         TileImVector.push_back(TileIm);
+                        Point TilePosition = Point(x,y);
+                        TilePositionVector.push_back(TilePosition);
                     }
                 }
             }
@@ -456,10 +459,30 @@ void MainWindow::ProcessTile()
 
     Mat TileIm = TileImVector[tileNr];
     Mat TileMask = TileMaskVector[tileNr];
+    Point TilePosition = TilePositionVector[tileNr];
+    int tileSize = ui->spinBoxTileSize->value();
     if(ui->checkBoxShowTile->checkState())
     {
-        ShowsScaledImage2(TileIm,"Tile Im",2.0,false);
-        ShowsScaledImage2(ShowRegion(TileMask),"Tile mask",2.0,false);
+        double tileScale = ui->doubleSpinBoxTileScale->value();
+        ShowsScaledImage2(TileIm,"Tile Im",tileScale,false);
+        ShowsScaledImage2(ShowRegion(TileMask),"Tile mask",tileScale,false);
+    }
+    if(ui->checkBoxShowTileOnImage->checkState())
+    {
+
+        Mat ImToShow;
+        ImIn.copyTo(ImToShow);
+        rectangle(ImToShow, Rect(TilePosition.x,TilePosition.y, tileSize, tileSize), Scalar(0.0, 255.0, 0.0, 0.0), 4);
+        ShowsScaledImage(ImToShow, "Tile On Image");
+
+    }
+    if(ui->checkBoxShowHist->checkState())
+    {
+        HistogramRGB HistogramTile;
+        HistogramTile.FromMat(TileIm,TileMask,-1);
+        imshow("Histogram from Tile" ,HistogramTile.PlotRGB(ui->spinBoxHistScaleHeight->value(),
+                                     ui->spinBoxHistScaleCoef->value(),
+                                     ui->spinBoxHistBarWidth->value()));
     }
 
 }
@@ -615,6 +638,26 @@ void MainWindow::on_checkBoxShowPC_toggled(bool checked)
 }
 
 void MainWindow::on_spinBoxTileToProcess_valueChanged(int arg1)
+{
+    ProcessTile();
+}
+
+void MainWindow::on_spinBoxHistScaleHeight_valueChanged(int arg1)
+{
+    ProcessTile();
+}
+
+void MainWindow::on_spinBoxHistScaleCoef_valueChanged(int arg1)
+{
+    ProcessTile();
+}
+
+void MainWindow::on_spinBoxHistBarWidth_valueChanged(int arg1)
+{
+    ProcessTile();
+}
+
+void MainWindow::on_checkBoxShowHist_toggled(bool checked)
 {
     ProcessTile();
 }
