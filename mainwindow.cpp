@@ -183,7 +183,31 @@ void ShowsScaledImage2(Mat Im, string ImWindowName, double displayScale, bool im
 
 }
 //------------------------------------------------------------------------------------------------------------------------------
+void GetLesionMask(Mat Im, Mat Mask, int par1, int par2)
+{
+    int maxXY = Im.cols * Im.rows;
 
+    uint8_t *wIm;
+    uint16_t *wMask;
+    wMask = (uint16_t*)Mask.data;
+    wIm = (uint8_t*)Im.data;
+    for(int i = 0; i< maxXY; i++)
+    {
+        uint8_t b = *wIm;
+        wIm++;
+        uint8_t g = *wIm;
+        wIm++;
+        uint8_t r = *wIm;
+        wIm++;
+
+        if(*wMask == 0 || b > par1 || g > par2)
+        {
+            *wMask = 0;
+        }
+        wMask++;
+    }
+
+}
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
 //          constructor Destructor
@@ -483,6 +507,12 @@ void MainWindow::ProcessTile()
         imshow("Histogram from Tile" ,HistogramTile.PlotRGB(ui->spinBoxHistScaleHeight->value(),
                                      ui->spinBoxHistScaleCoef->value(),
                                      ui->spinBoxHistBarWidth->value()));
+        Mat LesionMask;
+        TileMask.copyTo(LesionMask);
+
+        uint8 thresholdB = HistogramTile.meanB - (HistogramTile.maxB - HistogramTile.meanB);
+        GetLesionMask(TileIm,LesionMask, thresholdB, thresholdG)
+
     }
 
 }
