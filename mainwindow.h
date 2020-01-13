@@ -26,6 +26,7 @@ public:
     cv::Mat ImGray;
     cv::Mat ImGradient;
     cv::Mat Mask;
+    cv::Mat MaskHair;
     cv::Mat ImOut;
 
     std::vector<cv::Mat> TileImVector;
@@ -108,6 +109,26 @@ private slots:
 
 
     void on_checkBoxShowHist_toggled(bool checked);
+
+    void on_checkBoxSaveOutput_toggled(bool checked);
+
+    void on_comboBoxDisplayRange_currentIndexChanged(int index);
+
+    void on_checkBoxProcessGradient_toggled(bool checked);
+
+    void on_checkBoxMaskBackGround_toggled(bool checked);
+
+    void on_checkBoxProcessTile_toggled(bool checked);
+
+    void on_spinBoxTileSize_valueChanged(int arg1);
+
+    void on_checkBoxShowTile_toggled(bool checked);
+
+    void on_doubleSpinBoxTileScale_valueChanged(double arg1);
+
+    void on_checkBoxShowTileOnImage_toggled(bool checked);
+
+    void on_checkBoxShowLesionMask_toggled(bool checked);
 
 private:
     Ui::MainWindow *ui;

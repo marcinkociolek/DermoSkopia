@@ -408,62 +408,69 @@ void MainWindow::ProcessImages()
             ImGradient = GradientMorph(ImGray,ui->spinBoxGradientSchape->value())*10;
         break;
         }
-        Mask = Threshold16(ImGradient, ui->spinBoxGradThreshold->value());
+        MaskHair = Threshold16(ImGradient, ui->spinBoxGradThreshold->value());
 
     }
 
     if(ui->checkBoxMaskBackGround->checkState() && ImIn.channels() == 3)
     {
         Mask = MaskBackround(ImIn);
-
-        if(ui->checkBoxProcessTile->checkState())
-        {
-            int tileSize = ui->spinBoxTileSize->value();
-            int tileStep =tileSize/2;
-            TileImVector.clear();
-            TileMaskVector.clear();
-            TilePositionVector.clear();
-
-            int maxX = ImIn.cols;
-            int maxY = ImIn.rows;
-
-            int limX = maxX - tileSize;
-            int limY = maxY - tileSize;
-
-            for(int y = 0; y < limY; y += tileStep)
-            {
-                for(int x = 0; x < limX; x += tileStep)
-                {
-                    Mat TileMask;
-                    Mask(Rect(x, y, tileSize, tileSize)).copyTo(TileMask);
-
-                    uint16 *wTileMask = (uint16 *)TileMask.data;
-                    int tileMaxXY = tileSize * tileSize;
-                    int tileMaskCount = 0;
-                    for(int i = 0; i < tileMaxXY; i++)
-                    {
-                        if(*wTileMask)
-                            tileMaskCount++;
-                        wTileMask++;
-                    }
-                    int tileMaskThreshold = tileMaxXY * 90/100;
-                    if(tileMaskCount > tileMaskThreshold)
-                    {
-                        TileMaskVector.push_back(TileMask);
-                        Mat TileIm;
-                        ImIn(Rect(x, y, tileSize, tileSize)).copyTo(TileIm);
-                        TileImVector.push_back(TileIm);
-                        Point TilePosition = Point(x,y);
-                        TilePositionVector.push_back(TilePosition);
-                    }
-                }
-            }
-            ui->lineEditTileCount->setText(QString::fromStdString(to_string(TileImVector.size())));
-            ui->spinBoxTileToProcess->setMaximum(TileImVector.size() - 1);
-
-        }
+    }
+    else
+    {
+        Mask = Mat::ones(ImIn.rows,ImIn.cols, CV_16U);
     }
 
+    if(ui->checkBoxProcessGradient->checkState())
+        MaskMaskInv(Mask, MaskHair);
+
+    if(ui->checkBoxProcessTile->checkState())
+    {
+        int tileSize = ui->spinBoxTileSize->value();
+        int tileStep =tileSize/2;
+        TileImVector.clear();
+        TileMaskVector.clear();
+        TilePositionVector.clear();
+
+        int maxX = ImIn.cols;
+        int maxY = ImIn.rows;
+
+        int limX = maxX - tileSize;
+        int limY = maxY - tileSize;
+
+        for(int y = 0; y < limY; y += tileStep)
+        {
+            for(int x = 0; x < limX; x += tileStep)
+            {
+                Mat TileMask;
+                Mask(Rect(x, y, tileSize, tileSize)).copyTo(TileMask);
+
+                uint16 *wTileMask = (uint16 *)TileMask.data;
+                int tileMaxXY = tileSize * tileSize;
+                int tileMaskCount = 0;
+                for(int i = 0; i < tileMaxXY; i++)
+                {
+                    if(*wTileMask)
+                        tileMaskCount++;
+                    wTileMask++;
+                }
+                int tileMaskThreshold = tileMaxXY * 90/100;
+                if(tileMaskCount > tileMaskThreshold)
+                {
+                    TileMaskVector.push_back(TileMask);
+                    Mat TileIm;
+                    ImIn(Rect(x, y, tileSize, tileSize)).copyTo(TileIm);
+                    TileImVector.push_back(TileIm);
+                    Point TilePosition = Point(x,y);
+                    TilePositionVector.push_back(TilePosition);
+                }
+            }
+        }
+        ui->lineEditTileCount->setText(QString::fromStdString(to_string(TileImVector.size())));
+        ui->spinBoxTileToProcess->setMaximum(TileImVector.size() - 1);
+
+        ProcessTile();
+    }
 
 
     ShowImages();
@@ -471,6 +478,10 @@ void MainWindow::ProcessImages()
 //------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::ProcessTile()
 {
+    if(!ui->checkBoxProcessTile->checkState())
+        return;
+
+
     if(TileImVector.empty())
         return;
     if(TileMaskVector.empty())
@@ -500,19 +511,31 @@ void MainWindow::ProcessTile()
         ShowsScaledImage(ImToShow, "Tile On Image");
 
     }
+    Mat LesionMask;
     if(ui->checkBoxShowHist->checkState())
     {
         HistogramRGB HistogramTile;
-        HistogramTile.FromMat(TileIm,TileMask,-1);
+        HistogramTile.FromMat(TileIm,TileMask, 1);
         imshow("Histogram from Tile" ,HistogramTile.PlotRGB(ui->spinBoxHistScaleHeight->value(),
                                      ui->spinBoxHistScaleCoef->value(),
                                      ui->spinBoxHistBarWidth->value()));
-        Mat LesionMask;
+
         TileMask.copyTo(LesionMask);
 
-        uint8 thresholdB = HistogramTile.meanB - (HistogramTile.maxB - HistogramTile.meanB);
-        GetLesionMask(TileIm,LesionMask, thresholdB, thresholdG)
+        //uint8 thresholdB = HistogramTile.meanB - (HistogramTile.maxB - HistogramTile.meanB);
+        uint8 thresholdB = HistogramTile.GetMeanB() - (HistogramTile.GetMaxB() - HistogramTile.GetMeanB());
+        uint8 thresholdG = HistogramTile.GetMeanG() - (HistogramTile.GetMaxG() - HistogramTile.GetMeanG());
+        string outText = "thB = " + to_string(thresholdB) + " thG = " + to_string(thresholdG);
+        outText += " MeanB = " + to_string(HistogramTile.GetMeanB());
+        outText += " MaxB = " + to_string(HistogramTile.GetMaxB());
+        ui->textEditOut->append(QString::fromStdString(outText));
+        GetLesionMask(TileIm,LesionMask, thresholdB, thresholdG);
 
+    }
+    if(ui->checkBoxShowLesionMask->checkState())
+    {
+        double tileScale = ui->doubleSpinBoxTileScale->value();
+        ShowsScaledImage2(ShowRegion(LesionMask),"Lesion mask",tileScale,false);
     }
 
 }
@@ -609,12 +632,14 @@ void MainWindow::on_pushButtonOpenOutFolder_clicked()
 
 void MainWindow::on_doubleSpinBoxFixMinDisp_valueChanged(double arg1)
 {
-    ProcessImages();
+    //ProcessImages();
+    ShowImages();
 }
 
 void MainWindow::on_doubleSpinBoxFixMaxDisp_valueChanged(double arg1)
 {
-    ProcessImages();
+    //ProcessImages();
+    ShowImages();
 }
 
 void MainWindow::on_checkBoxShowGray_toggled(bool checked)
@@ -688,6 +713,56 @@ void MainWindow::on_spinBoxHistBarWidth_valueChanged(int arg1)
 }
 
 void MainWindow::on_checkBoxShowHist_toggled(bool checked)
+{
+    ProcessTile();
+}
+
+void MainWindow::on_checkBoxSaveOutput_toggled(bool checked)
+{
+
+}
+
+void MainWindow::on_comboBoxDisplayRange_currentIndexChanged(int index)
+{
+
+}
+
+void MainWindow::on_checkBoxProcessGradient_toggled(bool checked)
+{
+    ProcessImages();
+}
+
+void MainWindow::on_checkBoxMaskBackGround_toggled(bool checked)
+{
+    ProcessImages();
+}
+
+void MainWindow::on_checkBoxProcessTile_toggled(bool checked)
+{
+   ProcessImages();
+}
+
+void MainWindow::on_spinBoxTileSize_valueChanged(int arg1)
+{
+    ProcessImages();
+}
+
+void MainWindow::on_checkBoxShowTile_toggled(bool checked)
+{
+    ProcessTile();
+}
+
+void MainWindow::on_doubleSpinBoxTileScale_valueChanged(double arg1)
+{
+    ProcessTile();
+}
+
+void MainWindow::on_checkBoxShowTileOnImage_toggled(bool checked)
+{
+    ProcessTile();
+}
+
+void MainWindow::on_checkBoxShowLesionMask_toggled(bool checked)
 {
     ProcessTile();
 }

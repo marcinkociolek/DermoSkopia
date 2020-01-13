@@ -104,7 +104,7 @@
       <string>Show input</string>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBoxShowOutput">
@@ -120,7 +120,7 @@
       <string>Show output</string>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QSpinBox" name="spinBoxScaleBase">
@@ -449,7 +449,7 @@
       <string>Show mask</string>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
    </widget>
@@ -478,7 +478,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>.+.JPG</string>
+      <string>.+.tiff</string>
      </property>
     </widget>
     <widget class="QListWidget" name="listWidgetImageFiles">
@@ -540,7 +540,7 @@
       <string>Show Gray</string>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBoxShowPC">
@@ -556,7 +556,7 @@
       <string>Show PC</string>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
    </widget>
@@ -707,6 +707,9 @@
      <property name="text">
       <string>Process Gradient</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </widget>
    <widget class="QFrame" name="frame_5">
@@ -715,7 +718,7 @@
       <x>820</x>
       <y>80</y>
       <width>151</width>
-      <height>231</height>
+      <height>281</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -778,7 +781,7 @@
       <number>32</number>
      </property>
      <property name="value">
-      <number>128</number>
+      <number>256</number>
      </property>
     </widget>
     <widget class="QLabel" name="labelTileSize">
@@ -899,6 +902,25 @@
      </property>
      <property name="text">
       <string>Show Tile On Image</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="checkBoxShowLesionMask">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>210</y>
+       <width>121</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show LesionMask</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
