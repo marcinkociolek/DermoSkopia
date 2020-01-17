@@ -209,6 +209,89 @@ void GetLesionMask(Mat Im, Mat Mask, int par1, int par2)
 
 }
 //------------------------------------------------------------------------------------------------------------------------------
+void GetLesionMaskFromHStip(Mat Im, Mat Mask)
+{
+
+    int stripExpansion = 1;
+
+    int maxX = Im.cols;
+    int maxY = Im.rows;
+
+    int maxX3 = maxX*3 - 3;
+
+    Mat ImStrip;
+    Mat MaskStrip;
+    int startX = stripExpansion;
+    int stripSizeX = 1+ 2 * stripExpansion;
+    int stopX = maxX - stripExpansion;
+/*
+    unsigned char *wIm = (unsigned char *)Im.data;
+    for(int x = 0; x < maxX; x++)
+    {
+        uint16_t *wMask = (uint16_t *)Mask.data + x;
+        wIm = (unsigned char *)Im.data + (x * 3);
+        for(int y = 0; y < maxY; y++)
+        {
+            uint8_t b = *wIm;
+            wIm++;
+            uint8_t g = *wIm;
+            wIm++;
+            uint8_t r = *wIm;
+            wIm++;
+
+
+            *wMask = r;
+
+            wMask += maxX;
+            wIm += maxX3;
+        }
+    }
+return;
+*/
+    for(int x = startX; x < stopX; x++)
+    {
+
+        Im(Rect(x - stripExpansion, 0, stripSizeX, maxY)).copyTo(ImStrip);
+
+        Mask(Rect(x - stripExpansion, 0, stripSizeX, maxY)).copyTo(MaskStrip);
+
+
+        HistogramRGB HistogramStrip;
+
+        HistogramStrip.FromMat(ImStrip,MaskStrip, 1);
+
+
+        uint16_t *wMask = (uint16_t *)Mask.data + x;
+        unsigned char *wIm = (unsigned char *)Im.data + (x * 3);
+
+        uint8 thresholdB = HistogramStrip.GetMeanB() - (HistogramStrip.GetMaxB() - HistogramStrip.GetMeanB());
+        uint8 thresholdG = HistogramStrip.GetMeanG() - (HistogramStrip.GetMaxG() - HistogramStrip.GetMeanG());
+        int count = HistogramStrip.GetCount();
+
+        //continue;
+
+        for(int y = 0; y < maxY; y++)
+        {
+            uint8_t b = *wIm;
+            wIm++;
+            uint8_t g = *wIm;
+            wIm++;
+            uint8_t r = *wIm;
+            wIm++;
+            if(*wMask == 0 || b > thresholdB || g > thresholdG || count < 200)
+            {
+                *wMask = 0;
+            }
+
+            wMask += maxX;
+            wIm += maxX3;
+        }
+
+    }
+
+
+}
+//------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
 //          constructor Destructor
 //------------------------------------------------------------------------------------------------------------------------------
@@ -512,17 +595,21 @@ void MainWindow::ProcessTile()
 
     }
     Mat LesionMask;
-    if(ui->checkBoxShowHist->checkState())
+    HistogramRGB HistogramTile;
+    TileMask.copyTo(LesionMask);
+    if(ui->checkBoxShowHist->checkState() || !ui->checkBoxHorisontalLineMode->checkState())
     {
-        HistogramRGB HistogramTile;
         HistogramTile.FromMat(TileIm,TileMask, 1);
-        imshow("Histogram from Tile" ,HistogramTile.PlotRGB(ui->spinBoxHistScaleHeight->value(),
-                                     ui->spinBoxHistScaleCoef->value(),
-                                     ui->spinBoxHistBarWidth->value()));
+    }
 
-        TileMask.copyTo(LesionMask);
+    if(ui->checkBoxHorisontalLineMode->checkState())
+    {
+        GetLesionMaskFromHStip(TileIm,LesionMask);
+        imshow("XXXXXXXXXXXXX", ShowImage16Gray(LesionMask,0,255));
 
-        //uint8 thresholdB = HistogramTile.meanB - (HistogramTile.maxB - HistogramTile.meanB);
+    }
+    else
+    {
         uint8 thresholdB = HistogramTile.GetMeanB() - (HistogramTile.GetMaxB() - HistogramTile.GetMeanB());
         uint8 thresholdG = HistogramTile.GetMeanG() - (HistogramTile.GetMaxG() - HistogramTile.GetMeanG());
         string outText = "thB = " + to_string(thresholdB) + " thG = " + to_string(thresholdG);
@@ -530,8 +617,23 @@ void MainWindow::ProcessTile()
         outText += " MaxB = " + to_string(HistogramTile.GetMaxB());
         ui->textEditOut->append(QString::fromStdString(outText));
         GetLesionMask(TileIm,LesionMask, thresholdB, thresholdG);
+    }
+
+    if(ui->checkBoxShowHist->checkState())
+    {
+
+        imshow("Histogram from Tile" ,HistogramTile.PlotRGB(ui->spinBoxHistScaleHeight->value(),
+                                     ui->spinBoxHistScaleCoef->value(),
+                                     ui->spinBoxHistBarWidth->value()));
+
+
+
+        //uint8 thresholdB = HistogramTile.meanB - (HistogramTile.maxB - HistogramTile.meanB);
+
 
     }
+
+
     if(ui->checkBoxShowLesionMask->checkState())
     {
         double tileScale = ui->doubleSpinBoxTileScale->value();
@@ -613,11 +715,13 @@ void MainWindow::on_checkBoxShowOutput_toggled(bool checked)
 void MainWindow::on_spinBoxScalePower_valueChanged(int arg1)
 {
     ShowImages();
+    ProcessTile();
 }
 
 void MainWindow::on_spinBoxScaleBase_valueChanged(int arg1)
 {
     ShowImages();
+    ProcessTile();
 }
 
 void MainWindow::on_checkBoxImRotate_toggled(bool checked)
