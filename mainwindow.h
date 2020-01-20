@@ -130,6 +130,8 @@ private slots:
 
     void on_checkBoxShowLesionMask_toggled(bool checked);
 
+    void on_spinBoxTileSizeX_valueChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
 };

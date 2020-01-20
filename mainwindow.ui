@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1087</width>
-    <height>705</height>
+    <width>983</width>
+    <height>617</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -139,7 +139,7 @@
       <number>8</number>
      </property>
      <property name="value">
-      <number>3</number>
+      <number>6</number>
      </property>
     </widget>
     <widget class="QLabel" name="labelScaleBase">
@@ -363,6 +363,9 @@
       <number>1</number>
      </property>
      <property name="value">
+      <number>3</number>
+     </property>
+     <property name="displayIntegerBase">
       <number>10</number>
      </property>
     </widget>
@@ -388,7 +391,7 @@
       <number>5</number>
      </property>
      <property name="value">
-      <number>2</number>
+      <number>3</number>
      </property>
     </widget>
     <widget class="QLabel" name="labelDirHistBarWidth_2">
@@ -420,7 +423,7 @@
       <number>1</number>
      </property>
      <property name="value">
-      <number>2</number>
+      <number>1</number>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBoxImRotate">
@@ -718,7 +721,7 @@
       <x>820</x>
       <y>80</y>
       <width>151</width>
-      <height>281</height>
+      <height>361</height>
      </rect>
     </property>
     <property name="frameShape">
@@ -784,24 +787,24 @@
       <number>256</number>
      </property>
     </widget>
-    <widget class="QLabel" name="labelTileSize">
+    <widget class="QLabel" name="labelTileSizeY">
      <property name="geometry">
       <rect>
        <x>60</x>
        <y>50</y>
-       <width>47</width>
-       <height>14</height>
+       <width>51</width>
+       <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>Tile size</string>
+      <string>Tile size Y</string>
      </property>
     </widget>
     <widget class="QSpinBox" name="spinBoxTileToProcess">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>110</y>
+       <y>160</y>
        <width>43</width>
        <height>22</height>
       </rect>
@@ -811,7 +814,7 @@
      <property name="geometry">
       <rect>
        <x>60</x>
-       <y>110</y>
+       <y>160</y>
        <width>81</width>
        <height>16</height>
       </rect>
@@ -824,7 +827,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>80</y>
+       <y>130</y>
        <width>41</width>
        <height>21</height>
       </rect>
@@ -834,7 +837,7 @@
      <property name="geometry">
       <rect>
        <x>60</x>
-       <y>80</y>
+       <y>130</y>
        <width>47</width>
        <height>14</height>
       </rect>
@@ -847,7 +850,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>180</y>
+       <y>230</y>
        <width>72</width>
        <height>20</height>
       </rect>
@@ -863,7 +866,7 @@
      <property name="geometry">
       <rect>
        <x>60</x>
-       <y>200</y>
+       <y>250</y>
        <width>47</width>
        <height>14</height>
       </rect>
@@ -890,12 +893,15 @@
      <property name="maximum">
       <double>8.000000000000000</double>
      </property>
+     <property name="value">
+      <double>2.000000000000000</double>
+     </property>
     </widget>
     <widget class="QCheckBox" name="checkBoxShowTileOnImage">
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>230</y>
+       <y>280</y>
        <width>121</width>
        <height>20</height>
       </rect>
@@ -911,7 +917,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>250</y>
+       <y>300</y>
        <width>121</width>
        <height>20</height>
       </rect>
@@ -927,7 +933,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>150</y>
+       <y>180</y>
        <width>131</width>
        <height>20</height>
       </rect>
@@ -936,7 +942,42 @@
       <string>Horisontal Line Mode</string>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spinBoxTileSizeX">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>43</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>512</number>
+     </property>
+     <property name="singleStep">
+      <number>1</number>
+     </property>
+     <property name="value">
+      <number>64</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelTileSizeY_2">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>80</y>
+       <width>51</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Tile size X</string>
      </property>
     </widget>
    </widget>
@@ -946,7 +987,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1087</width>
+     <width>983</width>
      <height>21</height>
     </rect>
    </property>

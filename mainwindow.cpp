@@ -509,8 +509,17 @@ void MainWindow::ProcessImages()
 
     if(ui->checkBoxProcessTile->checkState())
     {
-        int tileSize = ui->spinBoxTileSize->value();
-        int tileStep =tileSize/2;
+        int tileStepX;
+        int tileStepY;
+        int tileSizeY = ui->spinBoxTileSize->value();
+        tileStepY =tileSizeY/2;
+        int tileSizeX = ui->spinBoxTileSizeX->value();
+
+        if (tileSizeX < 4)
+            tileStepX =tileSizeX;
+        else
+            tileStepX =tileSizeX/2;
+
         TileImVector.clear();
         TileMaskVector.clear();
         TilePositionVector.clear();
@@ -518,18 +527,18 @@ void MainWindow::ProcessImages()
         int maxX = ImIn.cols;
         int maxY = ImIn.rows;
 
-        int limX = maxX - tileSize;
-        int limY = maxY - tileSize;
+        int limX = maxX - tileSizeX;
+        int limY = maxY - tileSizeY;
 
-        for(int y = 0; y < limY; y += tileStep)
+        for(int y = 0; y < limY; y += tileStepY)
         {
-            for(int x = 0; x < limX; x += tileStep)
+            for(int x = 0; x < limX; x += tileStepX)
             {
                 Mat TileMask;
-                Mask(Rect(x, y, tileSize, tileSize)).copyTo(TileMask);
+                Mask(Rect(x, y, tileSizeX, tileSizeY)).copyTo(TileMask);
 
                 uint16 *wTileMask = (uint16 *)TileMask.data;
-                int tileMaxXY = tileSize * tileSize;
+                int tileMaxXY = tileSizeX * tileSizeY;
                 int tileMaskCount = 0;
                 for(int i = 0; i < tileMaxXY; i++)
                 {
@@ -537,12 +546,12 @@ void MainWindow::ProcessImages()
                         tileMaskCount++;
                     wTileMask++;
                 }
-                int tileMaskThreshold = tileMaxXY * 90/100;
+                int tileMaskThreshold = tileMaxXY * 80/100;
                 if(tileMaskCount > tileMaskThreshold)
                 {
                     TileMaskVector.push_back(TileMask);
                     Mat TileIm;
-                    ImIn(Rect(x, y, tileSize, tileSize)).copyTo(TileIm);
+                    ImIn(Rect(x, y, tileSizeX, tileSizeY)).copyTo(TileIm);
                     TileImVector.push_back(TileIm);
                     Point TilePosition = Point(x,y);
                     TilePositionVector.push_back(TilePosition);
@@ -578,7 +587,8 @@ void MainWindow::ProcessTile()
     Mat TileIm = TileImVector[tileNr];
     Mat TileMask = TileMaskVector[tileNr];
     Point TilePosition = TilePositionVector[tileNr];
-    int tileSize = ui->spinBoxTileSize->value();
+    int tileSizeY = ui->spinBoxTileSize->value();
+    int tileSizeX = ui->spinBoxTileSizeX->value();
     if(ui->checkBoxShowTile->checkState())
     {
         double tileScale = ui->doubleSpinBoxTileScale->value();
@@ -590,7 +600,7 @@ void MainWindow::ProcessTile()
 
         Mat ImToShow;
         ImIn.copyTo(ImToShow);
-        rectangle(ImToShow, Rect(TilePosition.x,TilePosition.y, tileSize, tileSize), Scalar(0.0, 255.0, 0.0, 0.0), 4);
+        rectangle(ImToShow, Rect(TilePosition.x,TilePosition.y, tileSizeX, tileSizeY), Scalar(0.0, 255.0, 0.0, 0.0), 4);
         ShowsScaledImage(ImToShow, "Tile On Image");
 
     }
@@ -869,4 +879,9 @@ void MainWindow::on_checkBoxShowTileOnImage_toggled(bool checked)
 void MainWindow::on_checkBoxShowLesionMask_toggled(bool checked)
 {
     ProcessTile();
+}
+
+void MainWindow::on_spinBoxTileSizeX_valueChanged(int arg1)
+{
+    ProcessImages();
 }
