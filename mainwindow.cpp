@@ -21,6 +21,7 @@
 #include "histograms.h"
 #include "gradient.h"
 #include "RegionU16Lib.h"
+#include "StringFcLib.h"
 
 #include "mazdaroi.h"
 #include "mazdaroiio.h"
@@ -741,7 +742,28 @@ void MainWindow::on_checkBoxImRotate_toggled(bool checked)
 
 void MainWindow::on_pushButtonOpenOutFolder_clicked()
 {
+    QFileDialog dialog(this, "Open Folder");
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.setDirectory(QString::fromStdString(ImageFolder.string()));
 
+    if(dialog.exec())
+    {
+        OutFolder = dialog.directory().path().toStdWString();
+    }
+    else
+        return;
+
+    if (!exists(OutFolder))
+    {
+        ui->textEditOut->append(QString::fromStdString(" Image folder : " + OutFolder.string()+ " not exists "));
+        OutFolder = "d:\\";
+    }
+    if (!is_directory(OutFolder))
+    {
+        ui->textEditOut->append(QString::fromStdString(" Image folder : " + OutFolder.string()+ " This is not a directory path "));
+        OutFolder = "d:\\";
+    }
+    ui->lineEditOutFolder->setText(QString::fromStdString(OutFolder.string()));
 }
 
 void MainWindow::on_doubleSpinBoxFixMinDisp_valueChanged(double arg1)
@@ -884,4 +906,61 @@ void MainWindow::on_checkBoxShowLesionMask_toggled(bool checked)
 void MainWindow::on_spinBoxTileSizeX_valueChanged(int arg1)
 {
     ProcessImages();
+}
+
+void MainWindow::on_pushButtonSaveTiles_clicked()
+{
+    int tileStepX = ui->spinBoxTileToSaveShift->value();;
+    int tileStepY = tileStepX;
+    int tileSizeX = ui->spinBoxTileToSaveSize->value();
+    int tileSizeY = tileSizeX;
+
+    int maxX = ImIn.cols;
+    int maxY = ImIn.rows;
+
+    int limX = maxX - tileSizeX;
+    int limY = maxY - tileSizeY;
+
+    for(int y = 0; y < limY; y += tileStepY)
+    {
+        for(int x = 0; x < limX; x += tileStepX)
+        {
+            Mat TileMask;
+            Mask(Rect(x, y, tileSizeX, tileSizeY)).copyTo(TileMask);
+
+            uint16 *wTileMask = (uint16 *)TileMask.data;
+            int tileMaxXY = tileSizeX * tileSizeY;
+            int tileMaskCount = 0;
+            for(int i = 0; i < tileMaxXY; i++)
+            {
+                if(*wTileMask)
+                    tileMaskCount++;
+                wTileMask++;
+            }
+            int tileMaskThreshold = tileMaxXY * 80/100;
+            if(tileMaskCount > tileMaskThreshold)
+            {
+                Mat TileIm;
+                ImIn(Rect(x, y, tileSizeX, tileSizeY)).copyTo(TileIm);
+                //Point TilePosition = Point(x,y);
+                path FileToSave;
+                string FileToSaveName;
+
+                string LocalFileName = path(FileName).stem().string();
+                FileToSave = OutFolder;
+                FileToSaveName = LocalFileName + "_Y" + ItoStrLZ(y,4) + "_X" + ItoStrLZ(x,4) + ".png";
+                FileToSave.append(FileToSaveName);
+                imwrite(FileToSave.string(),TileIm);
+
+                FileToSave = OutFolder;
+                FileToSaveName = LocalFileName + "_Y" + ItoStrLZ(y,4) + "_X" + ItoStrLZ(x,4) + "M.tif";
+                FileToSave.append(FileToSaveName);
+                imwrite(FileToSave.string(),TileMask);
+
+            }
+        }
+    }
+    ui->lineEditTileCount->setText(QString::fromStdString(to_string(TileImVector.size())));
+    ui->spinBoxTileToProcess->setMaximum(TileImVector.size() - 1);
+
 }

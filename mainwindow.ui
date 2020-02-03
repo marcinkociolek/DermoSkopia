@@ -981,6 +981,118 @@
      </property>
     </widget>
    </widget>
+   <widget class="QFrame" name="frame_6">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>370</y>
+      <width>151</width>
+      <height>171</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QSpinBox" name="spinBoxTileToSaveSize">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>43</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>32</number>
+     </property>
+     <property name="maximum">
+      <number>256</number>
+     </property>
+     <property name="singleStep">
+      <number>32</number>
+     </property>
+     <property name="value">
+      <number>256</number>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="spinBoxTileToSaveShift">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>43</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>32</number>
+     </property>
+     <property name="maximum">
+      <number>512</number>
+     </property>
+     <property name="singleStep">
+      <number>32</number>
+     </property>
+     <property name="value">
+      <number>128</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelTileToExport">
+     <property name="geometry">
+      <rect>
+       <x>16</x>
+       <y>10</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Tiles To Export</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>40</y>
+       <width>47</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Size</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>70</y>
+       <width>47</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Shift</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonSaveTiles">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>100</y>
+       <width>80</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Export Tiles</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
