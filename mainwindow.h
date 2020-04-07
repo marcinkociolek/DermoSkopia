@@ -29,6 +29,8 @@ public:
     cv::Mat MaskHair;
     cv::Mat ImOut;
 
+    cv::Mat LesionMask;
+
     std::vector<cv::Mat> TileImVector;
     std::vector<cv::Mat> TileMaskVector;
     std::vector<cv::Point> TilePositionVector;
@@ -46,6 +48,7 @@ public:
     void ShowImages();
     void ProcessImages();
     void ProcessTile();
+    void ProcessTile2();
 
 
 private slots:
@@ -135,6 +138,12 @@ private slots:
 
 
     void on_pushButtonSaveTiles_clicked();
+
+    void on_pushButtonAnalyse_clicked();
+
+    void on_spinBoxTileX_valueChanged(int arg1);
+
+    void on_spinBoxTileY_valueChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;

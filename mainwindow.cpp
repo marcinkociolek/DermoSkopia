@@ -402,7 +402,7 @@ void MainWindow::ShowsScaledImage(Mat Im, string ImWindowName)
 
     ImToShow = Im.clone();
 
-    displayScale = pow(double(ui->spinBoxScaleBase->value()), double(ui->spinBoxScalePower->value()));
+    displayScale = 1/double(ui->spinBoxScaleBase->value()); //pow(double(ui->spinBoxScaleBase->value()), double(ui->spinBoxScalePower->value()));
     if (displayScale != 1.0)
         cv::resize(ImToShow,ImToShow,Size(), displayScale, displayScale, INTER_AREA);
     if(ui->checkBoxImRotate->checkState())
@@ -436,9 +436,9 @@ void MainWindow::ProcessImages()
 {
     if(ImIn.empty())
     {
-
         return;
     }
+
     Mat ImGrayTemp;
     if(ui->checkBoxLoadAnydepth->checkState())
     {
@@ -501,6 +501,22 @@ void MainWindow::ProcessImages()
     if(ui->checkBoxMaskBackGround->checkState() && ImIn.channels() == 3)
     {
         Mask = MaskBackround(ImIn);
+        if(ui->checkBoxProcessMask->checkState())
+        {
+            FillBorderWithValue(Mask, 0xFFFF);
+            OneRegionFill5Fast1(Mask, 0xFFFF);
+            FillHoles(Mask, 1);
+            DeleteRegionFromImage(Mask, 0xFFFF);
+
+            //RemovingTinyReg9(Mask);
+            ErosionCV(Mask,18);
+            DilationCV(Mask,18);
+            ErosionCV(Mask,45);
+            ErosionCV(Mask,45);
+            ErosionCV(Mask,45);
+            //ErosionCV(Mask,18);
+        }
+
     }
     else
     {
@@ -510,11 +526,22 @@ void MainWindow::ProcessImages()
     if(ui->checkBoxProcessGradient->checkState())
         MaskMaskInv(Mask, MaskHair);
 
+    ui->spinBoxTileX->setMaximum(ImIn.cols - ui->spinBoxTileSizeX->value());
+    int tileStepX = ui->spinBoxTileSizeX->value() / 4;
+    if(tileStepX < 1)
+        tileStepX = 1;
+    ui->spinBoxTileX->setSingleStep(tileStepX);
+    ui->spinBoxTileY->setMaximum(ImIn.rows - ui->spinBoxTileSizeY->value());
+    int tileStepY = ui->spinBoxTileSizeY->value() / 4;
+    if(tileStepY < 1)
+        tileStepY = 1;
+    ui->spinBoxTileY->setSingleStep(tileStepY);
+
     if(ui->checkBoxProcessTile->checkState())
     {
         int tileStepX;
         int tileStepY;
-        int tileSizeY = ui->spinBoxTileSize->value();
+        int tileSizeY = ui->spinBoxTileSizeY->value();
         tileStepY =tileSizeY/2;
         int tileSizeX = ui->spinBoxTileSizeX->value();
 
@@ -590,7 +617,7 @@ void MainWindow::ProcessTile()
     Mat TileIm = TileImVector[tileNr];
     Mat TileMask = TileMaskVector[tileNr];
     Point TilePosition = TilePositionVector[tileNr];
-    int tileSizeY = ui->spinBoxTileSize->value();
+    int tileSizeY = ui->spinBoxTileSizeY->value();
     int tileSizeX = ui->spinBoxTileSizeX->value();
     if(ui->checkBoxShowTile->checkState())
     {
@@ -655,6 +682,93 @@ void MainWindow::ProcessTile()
 
 }
 //------------------------------------------------------------------------------------------------------------------------------
+void MainWindow::ProcessTile2()
+{
+    if(ImIn.empty())
+        return;
+    if(Mask.empty())
+        return;
+
+    //int tileStepX;
+    //int tileStepY;
+    int tileSizeY = ui->spinBoxTileSizeY->value();
+    //tileStepY =tileSizeY/4;
+    int tileSizeX = ui->spinBoxTileSizeX->value();
+
+    //if (tileSizeX < 4)
+    //    tileStepX =tileSizeX;
+    //else
+    //    tileStepX =tileSizeX/4;
+
+    int tileMaxXY = tileSizeX * tileSizeY;
+    int tileMaskThreshold = tileMaxXY * 80/100;
+
+    int x = ui->spinBoxTileX->value();
+    int y = ui->spinBoxTileY->value();
+    Mat TileMask;
+    Mat TileIm;
+    Mat TileLesionMask;
+    Mask(Rect(x, y, tileSizeX, tileSizeY)).copyTo(TileMask);
+
+    HistogramRGB HistogramTile;
+
+    uint16 *wTileMask = (uint16 *)TileMask.data;
+
+    int tileMaskCount = 0;
+    for(int i = 0; i < tileMaxXY; i++)
+    {
+        if(*wTileMask)
+            tileMaskCount++;
+        wTileMask++;
+    }
+
+    ImIn(Rect(x, y, tileSizeX, tileSizeY)).copyTo(TileIm);
+    TileMask.copyTo(TileLesionMask);
+    HistogramTile.FromMat(TileIm,TileMask, 1);
+
+    if(tileMaskCount > tileMaskThreshold)
+    {
+
+
+
+
+        uint8 thresholdB = HistogramTile.GetMeanB() - (HistogramTile.GetMaxB() - HistogramTile.GetMeanB());
+        uint8 thresholdG = HistogramTile.GetMeanG() - (HistogramTile.GetMaxG() - HistogramTile.GetMeanG());
+        string outText = "thB = " + to_string(thresholdB) + " thG = " + to_string(thresholdG);
+        outText += " MeanB = " + to_string(HistogramTile.GetMeanB());
+        outText += " MaxB = " + to_string(HistogramTile.GetMaxB());
+        ui->textEditOut->append(QString::fromStdString(outText));
+        GetLesionMask(TileIm,TileLesionMask, thresholdB, thresholdG);
+
+    }
+    if(ui->checkBoxShowTile->checkState())
+    {
+        double tileScale = ui->doubleSpinBoxTileScale->value();
+        ShowsScaledImage2(TileIm,"Tile Im",tileScale,false);
+        ShowsScaledImage2(ShowRegion(TileMask),"Tile mask",tileScale,false);
+    }
+    if(ui->checkBoxShowTileOnImage->checkState())
+    {
+
+        Mat ImToShow;
+        ImIn.copyTo(ImToShow);
+        rectangle(ImToShow, Rect(x,y, tileSizeX, tileSizeY), Scalar(0.0, 255.0, 0.0, 0.0), 4);
+        ShowsScaledImage(ImToShow, "Tile On Image");
+
+    }
+    if(ui->checkBoxShowHist->checkState())
+    {
+
+        imshow("Histogram from Tile" ,HistogramTile.PlotRGB(ui->spinBoxHistScaleHeight->value(),
+                                     ui->spinBoxHistScaleCoef->value(),
+                                     ui->spinBoxHistBarWidth->value()));
+    }
+    if(ui->checkBoxShowLesionMask->checkState())
+    {
+        double tileScale = ui->doubleSpinBoxTileScale->value();
+        ShowsScaledImage2(ShowRegion(LesionMask),"Lesion mask",tileScale,false);
+    }
+}
 //------------------------------------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------------------------------------
 //          Slots
@@ -664,7 +778,7 @@ void MainWindow::ProcessTile()
 void MainWindow::on_pushButtonOpenImageFolder_clicked()
 {
     QFileDialog dialog(this, "Open Folder");
-    dialog.setFileMode(QFileDialog::Directory);
+    //dialog.setFileMode(QFileDialog::Directory);
     dialog.setDirectory(QString::fromStdString(ImageFolder.string()));
 
     if(dialog.exec())
@@ -965,4 +1079,105 @@ void MainWindow::on_pushButtonSaveTiles_clicked()
     ui->lineEditTileCount->setText(QString::fromStdString(to_string(TileImVector.size())));
     ui->spinBoxTileToProcess->setMaximum(TileImVector.size() - 1);
 
+}
+
+void MainWindow::on_pushButtonAnalyse_clicked()
+{
+    if(ImIn.empty())
+        return;
+    if(Mask.empty())
+        return;
+    LesionMask.release();
+
+    int maxX = ImIn.cols;
+    int maxY = ImIn.rows;
+
+    LesionMask = Mat::zeros(maxY, maxX, CV_16U);
+
+    int tileStepX;
+    int tileStepY;
+    int tileSizeY = ui->spinBoxTileSizeY->value();
+    tileStepY =tileSizeY/4;
+    int tileSizeX = ui->spinBoxTileSizeX->value();
+
+    if (tileSizeX < 4)
+        tileStepX =tileSizeX;
+    else
+        tileStepX =tileSizeX/4;
+
+    int limX = maxX - tileSizeX;
+    int limY = maxY - tileSizeY;
+    int tileMaxXY = tileSizeX * tileSizeY;
+    int tileMaskThreshold = tileMaxXY * 80/100;
+
+    for(int y = 0; y < limY; y += tileStepY)
+    {
+        for(int x = 0; x < limX; x += tileStepX)
+        {
+            Mat TileMask;
+            Mask(Rect(x, y, tileSizeX, tileSizeY)).copyTo(TileMask);
+
+            uint16 *wTileMask = (uint16 *)TileMask.data;
+
+            int tileMaskCount = 0;
+            for(int i = 0; i < tileMaxXY; i++)
+            {
+                if(*wTileMask)
+                    tileMaskCount++;
+                wTileMask++;
+            }
+
+            if(tileMaskCount > tileMaskThreshold)
+            {
+
+                Mat TileIm;
+                ImIn(Rect(x, y, tileSizeX, tileSizeY)).copyTo(TileIm);
+
+                Mat TileLesionMask;
+                TileMask.copyTo(TileLesionMask);
+
+                HistogramRGB HistogramTile;
+                HistogramTile.FromMat(TileIm,TileMask, 1);
+
+                uint8 thresholdB = HistogramTile.GetMeanB() - (HistogramTile.GetMaxB() - HistogramTile.GetMeanB());
+                uint8 thresholdG = HistogramTile.GetMeanG() - (HistogramTile.GetMaxG() - HistogramTile.GetMeanG());
+                string outText = "thB = " + to_string(thresholdB) + " thG = " + to_string(thresholdG);
+                outText += " MeanB = " + to_string(HistogramTile.GetMeanB());
+                outText += " MaxB = " + to_string(HistogramTile.GetMaxB());
+                ui->textEditOut->append(QString::fromStdString(outText));
+                GetLesionMask(TileIm,TileLesionMask, thresholdB, thresholdG);
+
+                for(int lmY = 0; lmY < tileSizeY; lmY++)
+                {
+                    uint16* wLesionMask = LesionMask.ptr<uint16>(lmY + y)+x;
+                    uint16* wTileLesionMask = TileLesionMask.ptr<uint16>(lmY);
+                    for(int lmX = 0; lmX < tileSizeX; lmX++)
+                    {
+                        if(*wTileLesionMask)
+                            *wLesionMask = 1;
+                        wTileLesionMask++;
+                        wLesionMask++;
+                    }
+                }
+            }
+        }
+    }
+
+    ErosionCV(LesionMask,1);
+    DilationCV(LesionMask,1);
+    //RemovingTinyReg9(LesionMask);
+
+    ShowsScaledImage(ShowRegion(LesionMask),"Lesion mask Whole");
+    ShowsScaledImage(ShowSolidRegionOnImage(GetContour5(LesionMask*3), ImIn),"Contour of Lesion mask Whole");
+
+}
+
+void MainWindow::on_spinBoxTileX_valueChanged(int arg1)
+{
+    ProcessTile2();
+}
+
+void MainWindow::on_spinBoxTileY_valueChanged(int arg1)
+{
+    ProcessTile2();
 }
